@@ -53,6 +53,9 @@ static struct option getopt_long_options[] = {
     { "provider-key", 1, NULL, 'k' },
     { "resolver-address", 1, NULL, 'r' },
     { "user", 1, NULL, 'u' },
+#ifndef _WIN32
+    { "syslog", 1, NULL, 'S' },
+#endif
     { "test", 1, NULL, 't' },
     { "tcp-only", 0, NULL, 'T' },
     { "version", 0, NULL, 'V' },
@@ -64,7 +67,7 @@ static struct option getopt_long_options[] = {
     { NULL, 0, NULL, 0 }
 };
 #ifndef _WIN32
-static const char *getopt_options = "a:de:hk:L:l:m:n:p:r:R:t:u:N:TVX";
+static const char *getopt_options = "a:de:hk:L:l:m:n:p:r:R:St:u:N:TVX";
 #else
 static const char *getopt_options = "a:e:hk:L:m:n:r:R:t:u:N:TVX";
 #endif
@@ -117,6 +120,7 @@ void options_init_with_default(AppContext * const app_context,
     proxy_context->provider_name = NULL;
     proxy_context->provider_publickey_s = NULL;
     proxy_context->resolver_ip = NULL;
+    proxy_context->syslog = 0;
 #ifndef _WIN32
     proxy_context->user_id = (uid_t) 0;
     proxy_context->user_group = (uid_t) 0;
@@ -384,7 +388,8 @@ options_apply(ProxyContext * const proxy_context)
         logger_error(proxy_context, "Unable to open log file");
         exit(1);
     }
-    if (proxy_context->log_fd == -1 && proxy_context->daemonize) {
+    if (proxy_context->log_fd == -1 && (proxy_context->daemonize ||
+					proxy_context->syslog)) {
         logger_open_syslog(proxy_context);
     }
     return 0;
@@ -483,6 +488,9 @@ options_parse(AppContext * const app_context,
             break;
         case 'r':
             proxy_context->resolver_ip = optarg;
+            break;
+        case 'S':
+            proxy_context->syslog = 1;
             break;
         case 't': {
             char *endptr;

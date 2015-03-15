@@ -70,6 +70,8 @@ ports.
   * `-r`, `--resolver-address=<ip>[:port]`: a DNSCrypt-capable resolver IP
     address with an optional port. The default port is 443.
 
+  * `-S`, `--syslog`: log to syslog. `--daemonize` implies `--syslog`.
+
   * `-t`, `--test=<margin>`: don't actually start the proxy, but check that
     a valid certificate can be retrieved from the server and that it
     will remain valid for the next <margin> minutes. The exit code is 0
